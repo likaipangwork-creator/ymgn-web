@@ -979,14 +979,34 @@ export class DataStore {
     try {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      const { data, error } = await supabase
-        .from('rental_orders')
-        .select('*')
-        .gte('rent_date', thirtyDaysAgo.toISOString())
-        .order('rent_date', { ascending: false })
-        .limit(200)
-      if (error) throw error
-      this.orders = ((data ?? []) as RentalOrderRow[]).map(rentalOrderFromRow)
+      const dateString = thirtyDaysAgo.toISOString()
+
+      const [recentResult, activeResult] = await Promise.all([
+        supabase
+          .from('rental_orders')
+          .select('*')
+          .gte('rent_date', dateString)
+          .order('rent_date', { ascending: false })
+          .limit(200),
+        supabase
+          .from('rental_orders')
+          .select('*')
+          .eq('is_returned', false)
+          .order('rent_date', { ascending: false })
+          .limit(500),
+      ])
+
+      if (recentResult.error) throw recentResult.error
+      if (activeResult.error) throw activeResult.error
+
+      const merged = new Map<string, RentalOrder>()
+      for (const row of [...(activeResult.data ?? []), ...(recentResult.data ?? [])] as RentalOrderRow[]) {
+        merged.set(row.id, rentalOrderFromRow(row))
+      }
+
+      this.orders = [...merged.values()].sort(
+        (a, b) => b.rentDate.getTime() - a.rentDate.getTime()
+      )
       this.notify()
     } catch (error) {
       console.error('加载订单失败', error)
@@ -1026,8 +1046,8 @@ export class DataStore {
           this.orders[idx].modifyDate = now
         }
       }
-      await this.updateEquipmentUsage()
       if (reloadFromCloud) await this.loadOrders()
+      await this.updateEquipmentUsage()
     }
     this.notify()
     return allSuccess

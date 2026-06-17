@@ -10,6 +10,7 @@ import type {
   OrderEquipmentLineItem,
 } from '../types/models'
 import { EQU_CATEGORIES } from '../types/models'
+import { normalizeEntityId } from './ids'
 
 export function maintenanceQuantity(
   equipmentId: string,
@@ -377,11 +378,13 @@ export function equipmentsWithRecalculatedUsage(
   orders: { isReturned: boolean; equipmentItems: { equipment: Equipment; quantity: number }[] }[]
 ): Equipment[] {
   const items = source.map((eq) => ({ ...eq, usedCount: 0 }))
+  const indexById = new Map(items.map((eq, index) => [normalizeEntityId(eq.id), index]))
+
   for (const order of orders) {
     if (order.isReturned) continue
     for (const item of order.equipmentItems) {
-      const index = items.findIndex((eq) => eq.id === item.equipment.id)
-      if (index >= 0) {
+      const index = indexById.get(normalizeEntityId(item.equipment.id))
+      if (index !== undefined) {
         items[index].usedCount += item.quantity
       }
     }

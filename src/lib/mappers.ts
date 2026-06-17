@@ -1,4 +1,5 @@
 import { parseSupabaseDate, toISOString } from './dates'
+import { normalizeEntityId } from './ids'
 import type {
   AppAdmin,
   AppUser,
@@ -165,12 +166,7 @@ function parseEquCategory(raw: string | null | undefined): EquCategory {
 
 function parseGroupId(groupIdString: string | null | undefined): string | null {
   if (!groupIdString || groupIdString === '') return null
-  if (groupIdString.includes('-')) return groupIdString
-  const cleaned = groupIdString.replace(/-/g, '')
-  if (cleaned.length === 32) {
-    return `${cleaned.slice(0, 8)}-${cleaned.slice(8, 12)}-${cleaned.slice(12, 16)}-${cleaned.slice(16, 20)}-${cleaned.slice(20)}`
-  }
-  return groupIdString
+  return normalizeEntityId(groupIdString)
 }
 
 function encodeMaintenanceEquipment(items: OAMaintenanceEquipmentItem[]): string {
@@ -220,7 +216,7 @@ function parsePayStatus(raw: string | null | undefined): PayStatus {
 export function equipmentFromRow(row: EquipmentRow): Equipment {
   const shareCode = row.photo_share_code?.trim()
   return {
-    id: row.id,
+    id: normalizeEntityId(row.id),
     name: row.name.trim(),
     stock: row.stock,
     usedCount: row.used_count ?? 0,
@@ -370,10 +366,11 @@ export function rentalOrderFromRow(row: RentalOrderRow): RentalOrder {
   if (row.equipment_items && row.equipment_items.length > 0) {
     const grouped = new Map<string, OrderEquipmentLineItem>()
     for (const itemRow of row.equipment_items) {
+      const equipmentId = normalizeEntityId(itemRow.equipment_id)
       const eq =
-        loadedEquipments.find((e) => e.id === itemRow.equipment_id) ??
+        loadedEquipments.find((e) => e.id === equipmentId) ??
         ({
-          id: itemRow.equipment_id,
+          id: equipmentId,
           name: itemRow.equipment_name,
           stock: Math.max(1, itemRow.quantity),
           usedCount: 0,
