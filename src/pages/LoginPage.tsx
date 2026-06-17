@@ -29,8 +29,10 @@ export function LoginPage() {
 
         {!isSupabaseConfigured ? (
           <p className="error-text">
-            未检测到 Supabase 配置。请在 web-app 目录创建 .env 文件，填入与 App 相同的
-            VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY，然后重新运行 npm run dev。
+            未检测到 Supabase 配置。
+            {import.meta.env.PROD
+              ? ' 请在 Vercel → Settings → Environment Variables 添加 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY，然后 Redeploy。'
+              : ' 请在 web-app 目录创建 .env 文件，填入与 App 相同的 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY，然后重新运行 npm run dev。'}
           </p>
         ) : null}
 
@@ -63,6 +65,9 @@ export function LoginPage() {
         </form>
 
         <p className="login-note">使用与 iOS App 完全相同的账号密码</p>
+        {import.meta.env.PROD && isSupabaseConfigured ? (
+          <p className="login-note muted">服务器连接已配置</p>
+        ) : null}
       </div>
     </div>
   )

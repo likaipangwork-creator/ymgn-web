@@ -14,7 +14,7 @@ import {
   emailCandidatesForUsername,
   usernameFromAuthUser,
 } from '../lib/auth'
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
 interface AuthContextValue {
   session: Session | null
@@ -73,37 +73,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
     try {
       const candidates = emailCandidatesForUsername(inputUsername)
+      const passwordVariants = [password]
+      const trimmedPassword = password.trim()
+      if (trimmedPassword && trimmedPassword !== password) {
+        passwordVariants.push(trimmedPassword)
+      }
       let lastError: string | null = null
 
-      for (const email of candidates) {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-        if (!signInError && data.session) {
-          setSession(data.session)
-          setUsername(usernameFromAuthUser(data.user))
-          await refreshAdmins()
-          return true
+      const tryLogin = async (pwd: string) => {
+        for (const email of candidates) {
+          const { data, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password: pwd,
+          })
+          if (!signInError && data.session) {
+            setSession(data.session)
+            setUsername(usernameFromAuthUser(data.user))
+            await refreshAdmins()
+            return true
+          }
+          lastError = signInError?.message ?? null
+          const err = (lastError ?? '').toLowerCase()
+          // 仅「凭证错误」时尝试下一种邮箱格式；其它错误直接退出
+          if (
+            lastError &&
+            !err.includes('invalid login credentials') &&
+            !err.includes('invalid_credentials')
+          ) {
+            return false
+          }
         }
-        lastError = signInError?.message ?? null
-        // 仅「凭证错误」时尝试下一种邮箱格式；其它错误直接退出
+        return false
+      }
+
+      for (const pwd of passwordVariants) {
+        if (await tryLogin(pwd)) return true
+        const err = (lastError ?? '').toLowerCase()
         if (
           lastError &&
-          !lastError.toLowerCase().includes('invalid login credentials') &&
-          !lastError.toLowerCase().includes('invalid_credentials')
+          !err.includes('invalid login credentials') &&
+          !err.includes('invalid_credentials')
         ) {
           break
         }
       }
 
-      if (lastError?.toLowerCase().includes('failed to fetch')) {
+      const err = (lastError ?? '').toLowerCase()
+      if (err.includes('failed to fetch') || err.includes('network')) {
         setError('无法连接服务器，请检查网络或 Supabase 配置')
+      } else if (err.includes('invalid api key') || err.includes('api key')) {
+        setError('Supabase 密钥配置错误。请在 Vercel 环境变量中检查 VITE_SUPABASE_ANON_KEY，保存后重新部署')
+      } else if (!isSupabaseConfigured) {
+        setError('Supabase 未配置。请设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY 后重新部署')
+      } else if (err.includes('email not confirmed')) {
+        setError('邮箱尚未验证，请联系管理员在 Supabase 后台确认账号')
       } else if (
-        import.meta.env.DEV &&
-        lastError &&
-        !lastError.toLowerCase().includes('invalid login')
+        err.includes('invalid login credentials') ||
+        err.includes('invalid_credentials')
       ) {
+        setError('用户名或密码错误')
+      } else if (lastError) {
         setError(`登录失败：${lastError}`)
       } else {
         setError('用户名或密码错误')

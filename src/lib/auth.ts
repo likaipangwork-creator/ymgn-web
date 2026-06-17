@@ -20,6 +20,24 @@ export function swiftUsernameToEmail(username: string): string {
   return `${encoded}@${AUTH_EMAIL_DOMAIN}`
 }
 
+/** 若用户误填了完整邮箱，还原成用户名再生成候选 */
+function normalizeLoginUsername(input: string): string[] {
+  const raw = input.trim()
+  const variants = new Set<string>([input, raw])
+  const lower = raw.toLowerCase()
+  const suffix = `@${AUTH_EMAIL_DOMAIN}`
+  if (lower.endsWith(suffix)) {
+    const local = raw.slice(0, -suffix.length)
+    variants.add(local)
+    try {
+      variants.add(decodeURIComponent(local))
+    } catch {
+      /* ignore */
+    }
+  }
+  return [...variants].filter(Boolean)
+}
+
 /** 登录时尝试的邮箱候选（兼容不同版本 App 注册的账号） */
 export function emailCandidatesForUsername(username: string): string[] {
   const seen = new Set<string>()
@@ -27,18 +45,20 @@ export function emailCandidatesForUsername(username: string): string[] {
     if (email && !seen.has(email)) seen.add(email)
   }
 
-  // iOS signIn 不 trim，与 createAccount 会 trim — 两种都试
-  add(swiftUsernameToEmail(username))
-  add(swiftUsernameToEmail(username.trim()))
+  for (const name of normalizeLoginUsername(username)) {
+    // iOS signIn 不 trim，与 createAccount 会 trim — 两种都试
+    add(swiftUsernameToEmail(name))
+    add(swiftUsernameToEmail(name.trim()))
 
-  // 旧版或未编码的特殊字符账号
-  add(`${username}@${AUTH_EMAIL_DOMAIN}`)
-  add(`${username.trim()}@${AUTH_EMAIL_DOMAIN}`)
+    // 旧版或未编码的特殊字符账号
+    add(`${name}@${AUTH_EMAIL_DOMAIN}`)
+    add(`${name.trim()}@${AUTH_EMAIL_DOMAIN}`)
 
-  // 整段 encodeURIComponent（极少数历史账号）
-  const fullyEncoded = encodeURIComponent(username.trim())
-  if (fullyEncoded !== username.trim()) {
-    add(`${fullyEncoded}@${AUTH_EMAIL_DOMAIN}`)
+    // 整段 encodeURIComponent（极少数历史账号）
+    const fullyEncoded = encodeURIComponent(name.trim())
+    if (fullyEncoded !== name.trim()) {
+      add(`${fullyEncoded}@${AUTH_EMAIL_DOMAIN}`)
+    }
   }
 
   return [...seen]
