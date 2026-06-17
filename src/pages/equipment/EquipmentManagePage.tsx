@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PageToolbar } from '../../components/PageToolbar'
+import { EquipmentManageCard } from '../../components/EquipmentManageCard'
 import { PasswordModal } from '../../components/PasswordModal'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
@@ -169,27 +170,14 @@ export function EquipmentManagePage() {
               const rentable = rentableStock(eq)
               const maintenance = maintenanceQuantity(eq.id)
               return (
-                <article key={eq.id} className="data-card">
-                  <div className="data-card__header">
-                    <h3>{eq.name}</h3>
-                    <span className="badge">{eq.category}</span>
-                  </div>
-                  <p className="muted">条码：{eq.barcode || '—'}</p>
-                  <div className="stats-row">
-                    <span>库存 {eq.stock}</span>
-                    <span className="accent">可租 {rentable}</span>
-                    <span>已租 {eq.usedCount}</span>
-                    {maintenance > 0 ? <span>维护 {maintenance}</span> : null}
-                  </div>
-                  <div className="inline-actions">
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => requestEdit(eq)}>
-                      编辑
-                    </button>
-                    <button type="button" className="btn btn-ghost btn-sm btn-danger-text" onClick={() => requestDelete(eq)}>
-                      删除
-                    </button>
-                  </div>
-                </article>
+                <EquipmentManageCard
+                  key={eq.id}
+                  equipment={eq}
+                  rentable={rentable}
+                  maintenance={maintenance}
+                  onEdit={() => requestEdit(eq)}
+                  onDelete={() => requestDelete(eq)}
+                />
               )
             })}
           </div>

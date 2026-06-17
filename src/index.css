@@ -774,6 +774,119 @@ p {
   font-size: 0.95rem;
   color: var(--muted);
   margin: 12px 0 6px;
+  font-weight: 600;
+}
+
+/* ── Equipment manage card (matches iOS catalog style) ─────── */
+
+.equip-manage-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.07);
+}
+
+.equip-manage-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.equip-manage-card__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.equip-stock-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.equip-stock-badge--green {
+  background: rgba(52, 199, 89, 0.14);
+  color: #1f8f42;
+}
+
+.equip-stock-badge--red {
+  background: rgba(255, 59, 48, 0.12);
+  color: #d92d20;
+}
+
+.equip-stock-badge--orange {
+  background: rgba(255, 149, 0, 0.14);
+  color: #c56a00;
+}
+
+.equip-stock-badge--purple {
+  background: rgba(175, 82, 222, 0.14);
+  color: #8f3fbb;
+}
+
+.equip-manage-card__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.equip-manage-card__primary {
+  min-width: 0;
+}
+
+.equip-manage-card__inventory {
+  margin: 0 0 2px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.equip-manage-card__highlight {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1f73f2;
+}
+
+.equip-manage-card__highlight--maintenance {
+  color: #8f3fbb;
+}
+
+.equip-manage-card__maintenance-note {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: #8f3fbb;
+}
+
+.equip-manage-card__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.equip-manage-card__rented,
+.equip-manage-card__rate {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.equip-manage-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
 }
 
 .qty-control {
