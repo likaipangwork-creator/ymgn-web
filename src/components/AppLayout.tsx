@@ -14,9 +14,11 @@ export function AppLayout() {
     equipments,
     orders,
     customers,
+    inventoryStats,
   } = useData()
   const location = useLocation()
-  const dataSummary = `器材 ${equipments.length} · 订单 ${orders.length} · 客户 ${customers.length}`
+  const equipmentTotalUnits = inventoryStats(equipments).totalUnits
+  const dataSummary = `器材 ${equipmentTotalUnits} · 订单 ${orders.length} · 客户 ${customers.length}`
 
   return (
     <div className="app-shell">

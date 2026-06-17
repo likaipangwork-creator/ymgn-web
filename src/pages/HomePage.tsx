@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { MenuButton } from '../components/MenuButton'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -5,13 +6,19 @@ import { formatChineseDateTime } from '../lib/dates'
 
 export function HomePage() {
   const { isAdmin, isSuperAdmin } = useAuth()
-  const { isSyncing, lastSyncTime, fullRefresh, equipments, orders, customers } = useData()
+  const { isSyncing, lastSyncTime, fullRefresh, equipments, orders, customers, inventoryStats } =
+    useData()
+
+  const equipmentTotalUnits = useMemo(
+    () => inventoryStats(equipments).totalUnits,
+    [inventoryStats, equipments]
+  )
 
   return (
     <div className="stack">
       <section className="stats-strip" aria-label="数据概览">
         <div className="stats-strip__item">
-          <span className="stats-strip__value">{equipments.length}</span>
+          <span className="stats-strip__value">{equipmentTotalUnits}</span>
           <span className="stats-strip__label">器材</span>
         </div>
         <div className="stats-strip__item">
