@@ -795,6 +795,40 @@ p {
   margin-bottom: 8px;
 }
 
+.equip-manage-card__top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.equip-manage-card__menu {
+  position: relative;
+}
+
+.equip-manage-card__menu-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.equip-manage-card__menu-btn:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--text);
+}
+
+.equip-manage-card__context-menu {
+  right: 0;
+  bottom: calc(100% + 4px);
+}
+
 .equip-manage-card__name {
   margin: 0;
   font-size: 1.05rem;
@@ -879,14 +913,6 @@ p {
 .equip-manage-card__rate {
   font-size: 0.8rem;
   color: var(--muted);
-}
-
-.equip-manage-card__actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
 }
 
 .qty-control {

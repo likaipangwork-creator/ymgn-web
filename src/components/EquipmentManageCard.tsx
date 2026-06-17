@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Equipment } from '../types/models'
 
 type StockBadgeTone = 'green' | 'red' | 'orange' | 'purple'
@@ -40,6 +41,7 @@ export function EquipmentManageCard({
   onEdit,
   onDelete,
 }: EquipmentManageCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const badge = equipmentStockBadge(equipment, rentable, maintenance)
   const underMaintenanceBlocked = maintenance > 0 && rentable === 0
   const rentalRate =
@@ -51,7 +53,45 @@ export function EquipmentManageCard({
     <article className="equip-manage-card">
       <div className="equip-manage-card__top">
         <h3 className="equip-manage-card__name">{equipment.name}</h3>
-        <span className={`equip-stock-badge equip-stock-badge--${badge.tone}`}>{badge.label}</span>
+        <div className="equip-manage-card__top-right">
+          <span className={`equip-stock-badge equip-stock-badge--${badge.tone}`}>{badge.label}</span>
+          <div className="equip-manage-card__menu">
+            <button
+              type="button"
+              className="equip-manage-card__menu-btn"
+              aria-label="更多操作"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              ···
+            </button>
+            {menuOpen ? (
+              <div className="context-menu equip-manage-card__context-menu" role="menu">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onEdit()
+                  }}
+                >
+                  编辑
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="danger"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onDelete()
+                  }}
+                >
+                  删除
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <div className="equip-manage-card__body">
@@ -77,15 +117,6 @@ export function EquipmentManageCard({
             <span className="equip-manage-card__rate">出租率 {rentalRate}%</span>
           ) : null}
         </div>
-      </div>
-
-      <div className="equip-manage-card__actions">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onEdit}>
-          编辑
-        </button>
-        <button type="button" className="btn btn-ghost btn-sm btn-danger-text" onClick={onDelete}>
-          删除
-        </button>
       </div>
     </article>
   )
