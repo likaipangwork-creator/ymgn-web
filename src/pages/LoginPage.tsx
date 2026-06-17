@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { AppIcon } from '../components/AppIcon'
 import { useAuth } from '../context/AuthContext'
-import { isSupabaseConfigured } from '../lib/supabase'
+import { isSupabaseConfigured, supabaseEnvIssue } from '../lib/supabase'
 
 export function LoginPage() {
   const { session, signIn, isLoading, error } = useAuth()
@@ -29,10 +29,10 @@ export function LoginPage() {
 
         {!isSupabaseConfigured ? (
           <p className="error-text">
-            未检测到 Supabase 配置。
+            {supabaseEnvIssue ?? '未检测到 Supabase 配置。'}
             {import.meta.env.PROD
-              ? ' 请在 Vercel → Settings → Environment Variables 添加 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY，然后 Redeploy。'
-              : ' 请在 web-app 目录创建 .env 文件，填入与 App 相同的 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY，然后重新运行 npm run dev。'}
+              ? ' 请在 Vercel → Settings → Environment Variables 修正后 Redeploy。'
+              : ' 请在 web-app/.env 填入正确配置后重新运行 npm run dev。'}
           </p>
         ) : null}
 

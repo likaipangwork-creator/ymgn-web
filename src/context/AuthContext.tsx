@@ -14,7 +14,7 @@ import {
   emailCandidatesForUsername,
   usernameFromAuthUser,
 } from '../lib/auth'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase, supabaseEnvIssue } from '../lib/supabase'
 
 interface AuthContextValue {
   session: Session | null
@@ -123,8 +123,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError('无法连接服务器，请检查网络或 Supabase 配置')
       } else if (err.includes('invalid api key') || err.includes('api key')) {
         setError('Supabase 密钥配置错误。请在 Vercel 环境变量中检查 VITE_SUPABASE_ANON_KEY，保存后重新部署')
+      } else if (!isSupabaseConfigured && supabaseEnvIssue) {
+        setError(supabaseEnvIssue)
       } else if (!isSupabaseConfigured) {
-        setError('Supabase 未配置。请设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY 后重新部署')
       } else if (err.includes('email not confirmed')) {
         setError('邮箱尚未验证，请联系管理员在 Supabase 后台确认账号')
       } else if (
@@ -140,11 +141,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false
     } catch (err) {
       const message = err instanceof Error ? err.message : '未知错误'
-      setError(
-        message.toLowerCase().includes('fetch')
-          ? '无法连接服务器，请检查网络和 .env 中的 Supabase 地址'
-          : '登录失败，请稍后重试'
-      )
+      const lower = message.toLowerCase()
+      if (lower.includes('iso-8859-1') || lower.includes('non iso')) {
+        setError(
+          'Supabase 密钥含有非法字符（常见于误粘中文）。请在 Vercel 删除 VITE_SUPABASE_ANON_KEY，重新只粘贴 eyJ 开头的英文密钥，然后 Redeploy'
+        )
+      } else if (supabaseEnvIssue) {
+        setError(supabaseEnvIssue)
+      } else if (lower.includes('fetch')) {
+        setError('无法连接服务器，请检查网络和 Supabase 配置')
+      } else {
+        setError('登录失败，请稍后重试')
+      }
       return false
     } finally {
       setIsLoading(false)
