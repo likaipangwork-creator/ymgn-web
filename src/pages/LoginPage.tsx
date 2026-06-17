@@ -24,7 +24,7 @@ export function LoginPage() {
         <div className="login-card__hero">
           <AppIcon size={56} className="login-card__icon" />
           <h1>驿马光年</h1>
-          <p className="muted">Web 版 · 与 App 共用同一账号与数据</p>
+          <p className="muted">专业器材租赁管理系统</p>
         </div>
 
         {!isSupabaseConfigured ? (
@@ -42,7 +42,6 @@ export function LoginPage() {
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="与 App 相同"
               autoComplete="username"
               required
             />
@@ -53,7 +52,6 @@ export function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="至少 6 位"
               autoComplete="current-password"
               required
             />
@@ -64,10 +62,7 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="login-note">使用与 iOS App 完全相同的账号密码</p>
-        {import.meta.env.PROD && isSupabaseConfigured ? (
-          <p className="login-note muted">服务器连接已配置</p>
-        ) : null}
+        <p className="login-note">仅限驿马光年内部使用</p>
       </div>
     </div>
   )
