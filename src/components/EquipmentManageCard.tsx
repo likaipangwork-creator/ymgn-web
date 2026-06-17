@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Equipment } from '../types/models'
 
 type StockBadgeTone = 'green' | 'red' | 'orange' | 'purple'
@@ -42,6 +42,21 @@ export function EquipmentManageCard({
   onDelete,
 }: EquipmentManageCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    function handlePointerDown(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [menuOpen])
+
   const badge = equipmentStockBadge(equipment, rentable, maintenance)
   const underMaintenanceBlocked = maintenance > 0 && rentable === 0
   const rentalRate =
@@ -55,7 +70,7 @@ export function EquipmentManageCard({
         <h3 className="equip-manage-card__name">{equipment.name}</h3>
         <div className="equip-manage-card__top-right">
           <span className={`equip-stock-badge equip-stock-badge--${badge.tone}`}>{badge.label}</span>
-          <div className="equip-manage-card__menu">
+          <div className="equip-manage-card__menu" ref={menuRef}>
             <button
               type="button"
               className="equip-manage-card__menu-btn"
