@@ -5,9 +5,17 @@ interface BarcodeScannerProps {
   open: boolean
   onScan: (code: string) => void
   onClose: () => void
+  title?: string
+  hint?: string
 }
 
-export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
+export function BarcodeScanner({
+  open,
+  onScan,
+  onClose,
+  title = '扫码',
+  hint = '对准器材条码或套餐码',
+}: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const [error, setError] = useState<string | null>(null)
   const containerId = 'barcode-scanner-region'
@@ -60,8 +68,8 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
   return (
     <div className="modal-overlay" role="presentation">
       <div className="modal-card modal-card--wide">
-        <h3>扫码</h3>
-        <p className="muted">对准器材条码或套餐码</p>
+        <h3>{title}</h3>
+        <p className="muted">{hint}</p>
         <div id={containerId} className="scanner-region" />
         {error ? <p className="error-text">{error}</p> : null}
         <div className="modal-actions">

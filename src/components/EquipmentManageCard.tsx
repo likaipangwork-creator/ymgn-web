@@ -32,6 +32,7 @@ interface EquipmentManageCardProps {
   maintenance: number
   onEdit: () => void
   onDelete: () => void
+  readOnly?: boolean
 }
 
 export function EquipmentManageCard({
@@ -40,6 +41,7 @@ export function EquipmentManageCard({
   maintenance,
   onEdit,
   onDelete,
+  readOnly = false,
 }: EquipmentManageCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -70,42 +72,44 @@ export function EquipmentManageCard({
         <h3 className="equip-manage-card__name">{equipment.name}</h3>
         <div className="equip-manage-card__top-right">
           <span className={`equip-stock-badge equip-stock-badge--${badge.tone}`}>{badge.label}</span>
-          <div className="equip-manage-card__menu" ref={menuRef}>
-            <button
-              type="button"
-              className="equip-manage-card__menu-btn"
-              aria-label="更多操作"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              ···
-            </button>
-            {menuOpen ? (
-              <div className="context-menu equip-manage-card__context-menu" role="menu">
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    onEdit()
-                  }}
-                >
-                  编辑
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="danger"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    onDelete()
-                  }}
-                >
-                  删除
-                </button>
-              </div>
-            ) : null}
-          </div>
+          {!readOnly ? (
+            <div className="equip-manage-card__menu" ref={menuRef}>
+              <button
+                type="button"
+                className="equip-manage-card__menu-btn"
+                aria-label="更多操作"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                ···
+              </button>
+              {menuOpen ? (
+                <div className="context-menu equip-manage-card__context-menu" role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onEdit()
+                    }}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="danger"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onDelete()
+                    }}
+                  >
+                    删除
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 

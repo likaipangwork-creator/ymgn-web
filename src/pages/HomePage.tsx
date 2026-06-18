@@ -1,18 +1,61 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { BarcodeScanner } from '../components/BarcodeScanner'
+import { EquipmentScanResultModal } from '../components/EquipmentScanResultModal'
 import { MenuButton } from '../components/MenuButton'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { formatChineseDateTime } from '../lib/dates'
+import { resolveEquipmentsByScanCode, type ScanResolveResult } from '../lib/equipmentScanLookup'
 
 export function HomePage() {
   const { isAdmin, isSuperAdmin } = useAuth()
-  const { isSyncing, lastSyncTime, fullRefresh, equipments, orders, customers, inventoryStats } =
-    useData()
+  const {
+    isSyncing,
+    lastSyncTime,
+    fullRefresh,
+    equipments,
+    equipmentGroups,
+    equipmentBundles,
+    orders,
+    customers,
+    inventoryStats,
+  } = useData()
+
+  const [showScanner, setShowScanner] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const [scanResult, setScanResult] = useState<ScanResolveResult | null>(null)
+  const [scanError, setScanError] = useState<string | null>(null)
 
   const equipmentTotalUnits = useMemo(
     () => inventoryStats(equipments).totalUnits,
     [inventoryStats, equipments]
   )
+
+  function handleScan(code: string) {
+    const result = resolveEquipmentsByScanCode(code, {
+      equipments,
+      equipmentGroups,
+      equipmentBundles,
+    })
+    if (result) {
+      setScanResult(result)
+      setScanError(null)
+    } else {
+      setScanResult(null)
+      setScanError(`未找到条码：${code.trim()}`)
+    }
+    setShowResult(true)
+  }
+
+  function openScanner() {
+    setShowScanner(true)
+  }
+
+  function closeResult() {
+    setShowResult(false)
+    setScanResult(null)
+    setScanError(null)
+  }
 
   return (
     <div className="stack">
@@ -55,6 +98,12 @@ export function HomePage() {
       </section>
 
       <div className="menu-grid">
+        <MenuButton
+          title="扫码查器材"
+          icon="📷"
+          subtitle="扫描条码查看库存与出租状态"
+          onClick={openScanner}
+        />
         <MenuButton title="租赁订单" icon="🛒" to="/orders" subtitle="查看与管理租赁订单" />
         <MenuButton title="OA 提报" icon="📄" to="/oa" subtitle="维修与采购申报" />
         {isAdmin ? (
@@ -71,6 +120,25 @@ export function HomePage() {
           <MenuButton title="管理员管理" icon="🔑" to="/admin" subtitle="账号与权限管理" />
         ) : null}
       </div>
+
+      <BarcodeScanner
+        open={showScanner}
+        onScan={handleScan}
+        onClose={() => setShowScanner(false)}
+        title="扫码查器材"
+        hint="对准器材条码、文件夹码或套餐码"
+      />
+
+      <EquipmentScanResultModal
+        open={showResult}
+        result={scanResult}
+        error={scanError}
+        onClose={closeResult}
+        onScanAgain={() => {
+          closeResult()
+          openScanner()
+        }}
+      />
     </div>
   )
 }

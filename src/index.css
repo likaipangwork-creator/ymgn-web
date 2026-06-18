@@ -386,6 +386,24 @@ p {
   margin-top: 2px;
 }
 
+.menu-card--button {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.scan-result-modal__meta {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.scan-result-modal__list {
+  max-height: min(60vh, 520px);
+  overflow: auto;
+  margin-bottom: 4px;
+}
+
 .menu-card__chevron {
   margin-left: auto;
   color: var(--muted);
